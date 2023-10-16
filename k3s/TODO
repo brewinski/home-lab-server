@@ -1,0 +1,7 @@
+TODO Ansible Playbook to script RPI setup.
+TODO Ansible Playbook to script K3s setup.
+TODO Storage for the cluster. (NAS or other)
+TODO Scripts for setting up MetalLB.
+TODO Learn to combine MetalLB and Traefik.
+TODO PIHole
+TODO VPN
