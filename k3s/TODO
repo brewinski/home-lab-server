@@ -5,3 +5,4 @@ TODO Scripts for setting up MetalLB.
 TODO Learn to combine MetalLB and Traefik.
 TODO PIHole
 TODO VPN
+TODO ArgoCD to sync github repo with cluster
