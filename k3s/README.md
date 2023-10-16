@@ -13,7 +13,9 @@
 ### rpi4-ctrl.local
 - IP: 192.168.0.254
 - Username: chris.brewin
+- SSH: ssh chris.brewin@rpi4-ctrl.local
 
 ### rpi4-node01.local
 - IP: 192.168.0.253
 - Username: chris.brewin
+- SSH: ssh chris.brewin@rpi4-node01.local
