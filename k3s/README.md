@@ -8,3 +8,12 @@
 
 ## RPI4 Cluster Guides
 - https://rpi4cluster.com/
+
+## Node Information
+### rpi4-ctrl.local
+- IP: 192.168.0.254
+- Username: chris.brewin
+
+### rpi4-node01.local
+- IP: 192.168.0.253
+- Username: chris.brewin
