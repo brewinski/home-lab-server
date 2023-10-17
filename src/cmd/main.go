@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
+	fmt.Print("Starting application...")
 	limit := make(chan struct{}, 50)
 
 	for {
