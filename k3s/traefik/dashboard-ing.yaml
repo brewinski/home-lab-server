@@ -15,24 +15,3 @@ spec:
     services:
     - name: traefik-dashboard
       port: 80
-
-cat << 'EOF' | kubectl apply -f -
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: traefik-dashboard-ingress
-  namespace: kube-system
-  labels:
-    app.kubernetes.io/instance: traefik
-    app.kubernetes.io/name: traefik
-spec:
-  entryPoints:
-    - traefik
-  routes:
-  - match: PathPrefix(`/dashboard`)
-    kind: Rule
-    services:
-    - name: traefik-dashboard
-      port: 80
-
-EOF
