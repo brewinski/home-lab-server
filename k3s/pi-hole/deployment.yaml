@@ -55,9 +55,9 @@ spec:
         volumeMounts:
         - mountPath: /etc/pihole
           name: config
-        - mountPath: /etc/dnsmasq.d/02-custom.conf
-          name: custom-dnsmasq
-          subPath: 02-custom.conf
+        # - mountPath: /etc/dnsmasq.d/02-custom.conf
+        #   name: custom-dnsmasq
+        #   subPath: 02-custom.conf
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -67,8 +67,8 @@ spec:
       - name: config
         persistentVolumeClaim:
           claimName: pihole-config
-      - configMap:
-          defaultMode: 420
-          name: pihole-custom-dnsmasq
-        name: custom-dnsmasq
+      # - configMap:
+      #     defaultMode: 420
+      #     name: pihole-custom-dnsmasq
+      #   name: custom-dnsmasq
 status: {}
