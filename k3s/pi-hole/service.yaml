@@ -8,16 +8,16 @@ metadata:
 spec:
   externalTrafficPolicy: Local
   ports:
-  - name: dns
-    targetPort: dns
-    protocol: TCP
-    port: 53
-  - name: pihole-http
-    port: 80
-    nodePort: 30007
-    protocol: TCP
-    targetPort: pihole-http
+    - name: dns
+      targetPort: dns
+      protocol: TCP
+      port: 53
+    - name: pihole-http
+      port: 80
+      nodePort: 30007
+      protocol: TCP
+      targetPort: pihole-http
   selector:
     app: pihole
   sessionAffinity: None
-  type: NodePort
+  type: LoadBalancer
