@@ -9,9 +9,9 @@ spec:
   failedJobsHistoryLimit: 2
   jobTemplate:
     spec:
-      serviceAccountName: address-pool-editor-sa
       template:
         spec:
+          serviceAccountName: address-pool-editor-sa
           containers:
           - name: metallb-refresh
             image: alpine
