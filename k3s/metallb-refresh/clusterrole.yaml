@@ -8,6 +8,6 @@ rules:
   - apiGroups:
       - metallb.io
     resources:
-      - '*'
+      - ipaddresspools
     verbs:
-      - '*'
+      - delete
