@@ -9,6 +9,7 @@ spec:
   failedJobsHistoryLimit: 2
   jobTemplate:
     spec:
+      serviceAccountName: address-pool-editor-sa
       template:
         spec:
           containers:
