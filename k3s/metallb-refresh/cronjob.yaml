@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: metallb-refresh-cron
 spec:
-  schedule: "*/5 * * * *"
+  schedule: "*/2 * * * *"
   concurrencyPolicy: Replace
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 2
