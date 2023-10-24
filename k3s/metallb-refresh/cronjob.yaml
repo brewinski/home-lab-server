@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: metallb-refresh-cron
+spec:
+  schedule: "*/10 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: metallb-refresh
+            image: alpine
+            imagePullPolicy: IfNotPresent
+            command: ['sh', '-c', 'apk update && apk add curl && TOKEN=$(cat /run/secrets/kubernetes.io/serviceaccount/token) && curl -X "DELETE" -H "Authorization: Bearer $TOKEN" https://kubernetes/apis/metallb.io/v1beta1/namespaces/metallb-system/ipaddresspools/default-pool --insecure']
+          restartPolicy: OnFailure
