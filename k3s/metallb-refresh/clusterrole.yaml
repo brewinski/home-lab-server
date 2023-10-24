@@ -1,0 +1,14 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: address-pool-editor-cr
+  labels:
+    app: address-pool-editor
+rules:
+  - apiGroups:
+      - ''
+      - metallb.io
+    resources:
+      - '*'
+    verbs:
+      - '*'
