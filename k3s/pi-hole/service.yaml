@@ -20,4 +20,4 @@ spec:
   selector:
     app: pihole
   sessionAffinity: None
-  type: LoadBalancer
+  type: NodePort
