@@ -6,7 +6,6 @@ metadata:
     app: address-pool-editor
 rules:
   - apiGroups:
-      - ''
       - metallb.io
     resources:
       - '*'
