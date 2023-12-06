@@ -19,3 +19,13 @@
 - IP: 192.168.0.253
 - Username: chris.brewin
 - SSH: ssh chris.brewin@rpi4-node01.local
+
+### rpi4-node2.local
+- IP: 192.168.0.252
+- Username: chris.brewin
+- SSH: ssh chris.brewin@rpi4-node2.local
+
+### rpi4-node3.local
+- IP: 192.168.0.251
+- Username: chris.brewin
+- SSH: ssh chris.brewin@rpi4-node3.local

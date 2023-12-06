@@ -1,0 +1,7 @@
+go 1.21.3
+
+use (
+	./src/metro-volleyball-bot
+	./src/scratch-pad
+	./src/web-scraper
+)
