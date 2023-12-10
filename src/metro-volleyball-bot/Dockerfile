@@ -23,4 +23,4 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /out
 # 
 
 # Run
-CMD ["/out"]
+CMD ["/out -t $BOT_TOKEN"]
