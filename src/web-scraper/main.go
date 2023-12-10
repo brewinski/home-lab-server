@@ -1,21 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 )
 
 const HttpClientTimeout = "10s"
 
 type ProductRedirects struct {
-	Redirects []*url.URL
+	Redirects []string
 	Product Product
 }
 
 func main() {
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
 	headers := http.Header{}// accept: application/json, text/plain, */*'
 	headers.Add("Accept", "application/json, text/plain, */*")
 	headers.Add("content-type", "application/json")
@@ -58,17 +59,17 @@ func main() {
 		})
 	}
 
-	fmt.Println(productRedirects)
+	slog.Warn("redirect response", "output", productRedirects)
 }
 
-func RedirectReader(client http.Client, link *url.URL) ([]*url.URL, error) {
-	redirects := []*url.URL{
-		link,
+func RedirectReader(client http.Client, link *url.URL) ([]string, error) {
+	redirects := []string{
+		link.String(),
 	}
 
 	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		slog.Warn("redirect response", "url", req.URL)
-		redirects = append(redirects, req.URL)
+		redirects = append(redirects, req.URL.String())
 		return nil
 	}
 
@@ -80,7 +81,7 @@ func RedirectReader(client http.Client, link *url.URL) ([]*url.URL, error) {
 	_, err = client.Do(req)
 	if err != nil {
 		slog.Error("link request", "link", link, "error", err)
-		return []*url.URL{}, nil
+		return []string{}, nil
 	}
 
 	return redirects, nil
