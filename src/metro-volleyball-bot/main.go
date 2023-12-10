@@ -27,7 +27,9 @@ const (
 )
 
 func main() {
-    slog.Debug("starting bot...")
+    // set json as the default logger
+    slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
+
     // Create a new Discord session using the provided bot token.
     flag.StringVar(&Token, "t", "", "Bot Token")
     flag.Parse()
