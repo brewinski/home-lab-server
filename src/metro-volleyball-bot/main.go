@@ -27,6 +27,7 @@ const (
 )
 
 func main() {
+    slog.Debug("starting bot...")
     // Create a new Discord session using the provided bot token.
     flag.StringVar(&Token, "t", "", "Bot Token")
     flag.Parse()
