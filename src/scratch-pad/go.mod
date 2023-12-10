@@ -1,3 +1,3 @@
 module github.com/brewinski/home-lab-server
 
-go 1.21.3
+go 1.21

@@ -1,6 +1,6 @@
 module github.com/brewinski/home-lab-server/src/metro-volleyball-bot
 
-go 1.21.3
+go 1.21
 
 require github.com/bwmarrin/discordgo v0.27.1
 
