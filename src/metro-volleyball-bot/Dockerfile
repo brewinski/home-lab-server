@@ -11,6 +11,8 @@ RUN go mod download
 # https://docs.docker.com/engine/reference/builder/#copy
 COPY *.go ./
 
+RUN env
+
 # Build
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-X main.GitCommit=$(RAILWAY_GIT_COMMIT_SHA)' -o /out
 
