@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/brewinski/home-lab-server/src/metro-volleyball-bot/bot"
+	"github.com/brewinski/metro-volleyball-bot/bot"
 	"github.com/bwmarrin/discordgo"
 )
 

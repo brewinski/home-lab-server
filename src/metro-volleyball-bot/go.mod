@@ -1,4 +1,4 @@
-module github.com/brewinski/home-lab-server/src/metro-volleyball-bot
+module github.com/brewinski/metro-volleyball-bot
 
 go 1.21
 
