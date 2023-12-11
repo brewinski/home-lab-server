@@ -16,6 +16,12 @@ import (
 
 // Variables used for command line parameters
 var (
+    // Build Information
+    BinVersion     = "unknown"
+    GitCommit      = "unknown"
+    BuildTime      = "unknown"
+    BuildGoVersion = "unknown"
+    // Program Information
     Token string
     lastData string
 )
@@ -28,7 +34,12 @@ const (
 
 func main() {
     // set json as the default logger
-    slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
+    slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)).With(
+        slog.String("commit", GitCommit),
+        slog.String("go_version", BuildGoVersion),
+    ))
+
+    slog.Info("Starting...")
 
     // Create a new Discord session using the provided bot token.
     flag.StringVar(&Token, "t", "", "Bot Token")

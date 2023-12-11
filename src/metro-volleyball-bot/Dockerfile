@@ -12,7 +12,7 @@ RUN go mod download
 COPY *.go ./
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux go build -o /out
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-X main.GitCommit=$(shell git rev-list -1 HEAD)' -o /out
 
 # Optional:
 # To bind to a TCP port, runtime parameters must be supplied to the docker command.
