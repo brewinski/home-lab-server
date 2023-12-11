@@ -22,7 +22,7 @@ var (
 
 const (
     NotificationsChannel = "metro-volleyball-notifications"
-    PING_FREQUENCY = 10 * time.Minute
+    PING_FREQUENCY = 1 * time.Hour
     PAGE_URL = "https://www.vq.org.au/competitions/metro-league/"
 )
 
