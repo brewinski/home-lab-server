@@ -50,6 +50,7 @@ func (b *Bot) MoitorListenAndServe(s *discordgo.Session) {
 	_, err := b.monitorPage(b.config.MonitorUrl)
 	if err != nil {
 		slog.Error("request to monitor page failed for seeding initial data", "error", err)
+		return
 	}
 
 	// loop for the duration of the program.
@@ -89,6 +90,8 @@ func (b *Bot) MoitorListenAndServe(s *discordgo.Session) {
     }
 }
 
+// ping the page and check if anything has changed.
+// it will return false if the page hasn't been checked in the past
 func (b *Bot) monitorPage(pageUrl string) (bool, error) {
 	response, err := http.Get(pageUrl)
 	if err != nil {
