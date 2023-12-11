@@ -22,9 +22,5 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-X main.GitCommit=$(RAILWAY_GIT_
 # EXPOSE 8080
 # 
 
-FROM scratch
-
-COPY --from=builder /app/out /out
-
 # Run
 CMD /out -t $DISCORD_TOKEN
