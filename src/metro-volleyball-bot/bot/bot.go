@@ -11,6 +11,7 @@ import (
 )
 
 type Bot struct {
+	lastPageResponse string
 	config Config
 }
 
@@ -22,6 +23,7 @@ type Config struct {
 
 func New(cfg Config) *Bot {
 	return &Bot{
+		"",
 		cfg,
 	}
 }
@@ -44,11 +46,20 @@ func (b *Bot) ReadyHandler(s *discordgo.Session, event *discordgo.Ready) {
 
 // Monitor a specific page for changes
 func (b *Bot) MonitorPageHandler(s *discordgo.Session) {
-    for range time.Tick(b.config.TickSpeed) {
-        status := monitorPage(b.config.MonitorUrl)
+	// if the last response is empty we need to get the initial response.
+	if b.lastPageResponse == "" {
+		b.monitorPage(b.config.MonitorUrl)
+	}
 
-        if status == "" {
-            slog.Info("nothin has changed")
+	// loop until we die
+    for range time.Tick(b.config.TickSpeed) {
+        status, err := b.monitorPage(b.config.MonitorUrl)
+		if err != nil {
+			slog.Error("monitor request failed", "url", b.config.MonitorUrl, "error", err)
+		}
+
+        if !status {
+            slog.Info("monitor request, nothing has changed", b.config.MonitorUrl, "status", status)
             continue;
         }
 
@@ -64,45 +75,41 @@ func (b *Bot) MonitorPageHandler(s *discordgo.Session) {
                 slog.Error("Could not create channel", "error", err, "guild_id", guild.ID)
                 continue;
             }
+
             slog.Info("sending message", "channel_id", channel.ID, "channel_name", channel.Name, "guild_id", guild.ID)
-            s.ChannelMessageSend(channel.ID, status) // add some emojis
+
+            s.ChannelMessageSend(
+				channel.ID,
+				fmt.Sprintf("monitored page has changed, go to %s and review the changes", b.config.MonitorUrl)
+			)
         }
     }
 }
 
-var lastData string
-
-func monitorPage(pageUrl string) string {
-	slog.Info("monitoring page for changes", "url", pageUrl)
-
+func (b *Bot) monitorPage(pageUrl string) (bool, error) {
 	response, err := http.Get(pageUrl)
 	if err != nil {
-		slog.Error("page request failed", "error", err)
-		return "failed request"
+		return false, err
 	}
 
 	defer response.Body.Close()
 	
 	respBytes, err := io.ReadAll(response.Body)
 	if err != nil {
-		slog.Error("page response unreadable", "error", err)
-		return "failed read"
+		return false, err
 	}
 
 	slog.Info("page response", "status", response.Status, "content-length", response.ContentLength)
 
-	if lastData == "" {
-		slog.Info("initial data set")
-		lastData = string(respBytes)
+	if b.lastPageResponse == "" {
+		b.lastPageResponse = string(respBytes)
 	} 
 	
-	if lastData != string(respBytes) {
-		slog.Info("data changed")
-		lastData = string(respBytes)
-		return "data changed"
+	if b.lastPageResponse != string(respBytes) {
+		b.lastPageResponse = string(respBytes)
+		return true, nil
 	} else {
-		slog.Info("data unchanged")
-		return "unchanged"
+		return false, nil
 	}
 }
 
