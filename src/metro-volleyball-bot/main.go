@@ -113,7 +113,6 @@ func ready(s *discordgo.Session, event *discordgo.Ready) {
 // }
 
 func createChannelIfNotExists(s *discordgo.Session, guildId string, channelName string) (channel *discordgo.Channel, err error) {
-    slog.Info("creating channel channel", "guild_id", guildId, "name", NotificationsChannel)
     // Check if the channel already exists
     channels, err := s.GuildChannels(guildId)
     if err != nil {
@@ -124,11 +123,13 @@ func createChannelIfNotExists(s *discordgo.Session, guildId string, channelName 
     // get the existing channel if it already exists
     for _, channel := range channels {
         if channel.Name == NotificationsChannel {
-            slog.Info("channel exists", "channel_id", channel.ID, "channel_name", channel.Name, "guild_id", guildId,)
+            slog.Info("channel exists, skipping create", "channel_id", channel.ID, "channel_name", channel.Name, "guild_id", guildId,)
             return channel, nil
         }
     }
 
+    slog.Info("channel not found, creating channel...", "guild_id", guildId)
+    
     // create the channel if it doesn't already exist.
     channel, err = s.GuildChannelCreate(guildId, NotificationsChannel, discordgo.ChannelTypeGuildText)
     if err != nil {
