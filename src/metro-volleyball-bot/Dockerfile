@@ -1,4 +1,4 @@
-FROM golang:1.21
+FROM golang:1.21 as builder
 
 # Set destination for COPY
 WORKDIR /app
@@ -21,6 +21,10 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-X main.GitCommit=$(RAILWAY_GIT_
 # https://docs.docker.com/engine/reference/builder/#expose
 # EXPOSE 8080
 # 
+
+FROM scratch
+
+COPY --from=builder /app/out /out
 
 # Run
 CMD /out -t $DISCORD_TOKEN
