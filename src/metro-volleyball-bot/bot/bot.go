@@ -40,14 +40,17 @@ func (b *Bot) ReadyHandler(s *discordgo.Session, event *discordgo.Ready) {
             continue;
         }
 
-        s.ChannelMessageSend(channel.ID, "metro bot ready") // add some emojis
+        s.ChannelMessageSend(channel.ID, fmt.Sprintf("metro bot ready, monitoring page: %s", b.config.MonitorUrl) ) // add some emojis
     }
 }
 
 // Monitor a specific page for changes
 func (b *Bot) MoitorListenAndServe(s *discordgo.Session) {
 	// if the last response is empty we need to get the initial response.
-	b.monitorPage(b.config.MonitorUrl)
+	_, err := b.monitorPage(b.config.MonitorUrl)
+	if err != nil {
+		slog.Error("request to monitor page failed for seeding initial data", "error", err)
+	}
 
 	// loop for the duration of the program.
     for range time.Tick(b.config.TickSpeed) {
