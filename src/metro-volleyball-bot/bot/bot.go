@@ -54,7 +54,7 @@ func (b *Bot) MoitorListenAndServe(s *discordgo.Session) {
 	}
 
 	// loop for the duration of the program.
-    for range time.Tick(b.config.TickSpeed) {
+    for range time.NewTicker(b.config.TickSpeed).C {
         status, err := b.monitorPage(b.config.MonitorUrl)
 		if err != nil {
 			slog.Error("monitor request failed", "url", b.config.MonitorUrl, "error", err)
