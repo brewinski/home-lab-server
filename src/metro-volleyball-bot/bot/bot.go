@@ -38,7 +38,7 @@ func (b *Bot) ReadyHandler(s *discordgo.Session, event *discordgo.Ready) {
             continue;
         }
 
-        s.ChannelMessageSend(channel.ID, "metro volleyball bot ready") // add some emojis
+        s.ChannelMessageSend(channel.ID, "metro bot ready") // add some emojis
     }
 }
 

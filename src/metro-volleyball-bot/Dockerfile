@@ -25,4 +25,4 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-X main.GitCommit=$(RAILWAY_GIT_
 # 
 
 # Run
-CMD /out -t $DISCORD_TOKEN
+CMD /out -t $DISCORD_TOKEN -ts $TICK_SPEED
