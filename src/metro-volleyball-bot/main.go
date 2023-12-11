@@ -68,7 +68,7 @@ func main() {
     }
 
     // monitor the page 
-    go myBot.MonitorPageHandler(dg)
+    go myBot.MoitorListenAndServe(dg)
 
     // Wait here until CTRL-C or other term signal is received.
     slog.Info("bot is running. press ctrl-c to exit.")

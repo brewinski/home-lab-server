@@ -45,11 +45,11 @@ func (b *Bot) ReadyHandler(s *discordgo.Session, event *discordgo.Ready) {
 }
 
 // Monitor a specific page for changes
-func (b *Bot) MonitorPageHandler(s *discordgo.Session) {
+func (b *Bot) MoitorListenAndServe(s *discordgo.Session) {
 	// if the last response is empty we need to get the initial response.
 	b.monitorPage(b.config.MonitorUrl)
 
-	// loop until we die
+	// loop for the duration of the program.
     for range time.Tick(b.config.TickSpeed) {
         status, err := b.monitorPage(b.config.MonitorUrl)
 		if err != nil {
@@ -100,10 +100,6 @@ func (b *Bot) monitorPage(pageUrl string) (bool, error) {
 	}
 
 	slog.Info("page response", "status", response.Status, "content-length", response.ContentLength)
-
-	if b.lastPageResponse == "" {
-		b.lastPageResponse = string(respBytes)
-	} 
 	
 	if b.lastPageResponse != string(respBytes) {
 		b.lastPageResponse = string(respBytes)
