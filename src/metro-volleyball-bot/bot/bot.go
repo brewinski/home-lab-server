@@ -60,7 +60,7 @@ func (b *Bot) MoitorListenAndServe(s *discordgo.Session) {
 		}
 
         if !status {
-            slog.Info("monitor request, nothing has changed", b.config.MonitorUrl, "status", status)
+            slog.Info("monitor request, nothing has changed", b.config.MonitorUrl, slog.Bool("status", status))
             continue;
         }
 
