@@ -35,8 +35,6 @@ const (
 func main() {
     // set json as the default logger
     slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)).With(
-        slog.String("commit", GitCommit),
-        slog.String("go_version", BuildGoVersion),
         slog.Duration("tick_speed", PING_FREQUENCY),
         slog.String("channel", NotificationsChannel),
         slog.String("page", PAGE_URL),
@@ -129,7 +127,7 @@ func createChannelIfNotExists(s *discordgo.Session, guildId string, channelName 
     }
 
     slog.Info("channel not found, creating channel...", "guild_id", guildId)
-    
+
     // create the channel if it doesn't already exist.
     channel, err = s.GuildChannelCreate(guildId, NotificationsChannel, discordgo.ChannelTypeGuildText)
     if err != nil {
