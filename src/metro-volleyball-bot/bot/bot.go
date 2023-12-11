@@ -47,9 +47,7 @@ func (b *Bot) ReadyHandler(s *discordgo.Session, event *discordgo.Ready) {
 // Monitor a specific page for changes
 func (b *Bot) MonitorPageHandler(s *discordgo.Session) {
 	// if the last response is empty we need to get the initial response.
-	if b.lastPageResponse == "" {
-		b.monitorPage(b.config.MonitorUrl)
-	}
+	b.monitorPage(b.config.MonitorUrl)
 
 	// loop until we die
     for range time.Tick(b.config.TickSpeed) {
