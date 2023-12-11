@@ -76,12 +76,14 @@ func (b *Bot) MonitorPageHandler(s *discordgo.Session) {
                 continue;
             }
 
-            slog.Info("sending message", "channel_id", channel.ID, "channel_name", channel.Name, "guild_id", guild.ID)
+            slog.Info("message sending", "channel_id", channel.ID, "channel_name", channel.Name, "guild_id", guild.ID)
 
             s.ChannelMessageSend(
 				channel.ID,
 				fmt.Sprintf("monitored page has changed, go to %s and review the changes", b.config.MonitorUrl)
 			)
+
+			slog.Info("message sent", "channel_id", channel.ID, "channel_name", channel.Name, "guild_id", guild.ID)
         }
     }
 }
