@@ -14,11 +14,6 @@ import (
 
 // Variables used for command line parameters
 var (
-    // Build Information
-    BinVersion     = "unknown"
-    GitCommit      = "unknown"
-    BuildTime      = "unknown"
-    BuildGoVersion = "unknown"
     // Program Information
     Token string
 )
