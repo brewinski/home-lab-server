@@ -14,27 +14,29 @@ import (
 
 // Variables used for command line parameters
 var (
-    // Program Information
     Token string
+    TickSpeed time.Duration
 )
 
 const (
     NotificationsChannel = "metro-volleyball-notifications"
-    PING_FREQUENCY = 1 * time.Hour
-    PAGE_URL = "https://www.vq.org.au/competitions/metro-league/"
+    PageUrl = "https://www.vq.org.au/competitions/metro-league/"
 )
 
 func main() {
+    // Read the Discord token as an applicatioln flag.
+    flag.StringVar(&Token, "t", "", "The token for the specific discord application.")
+    // Read the page check frequency duration. Parsed as "1ms", "1ns", "1s", "1m", or "1h"
+    flag.DurationVar(&TickSpeed, "ts", 1 * time.Hour, "Page ping frequency as a string duration")
+    // Parse the flags from the command line
+    flag.Parse()
+
     // set json as the default logger
     slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)).With(
-        slog.Duration("tick_speed", PING_FREQUENCY),
+        slog.String("tick_speed", TickSpeed.String()),
         slog.String("channel", NotificationsChannel),
-        slog.String("page", PAGE_URL),
+        slog.String("page", PageUrl),
     ))
-    
-    // Create a new Discord session using the provided bot token.
-    flag.StringVar(&Token, "t", "", "Bot Token")
-    flag.Parse()
 
     // Create a new Discord session using the provided bot token.
     dg, err := discordgo.New("Bot " + Token)
@@ -43,10 +45,14 @@ func main() {
         return
     }
 
-    // create a new bot implementation
     myBot := bot.New(bot.Config{
         UpdatesChannel: NotificationsChannel,
+        TickSpeed: TickSpeed,
+        MonitorUrl: PageUrl,
     })
+
+    // get initial page data
+    // myBot.
 
     // register the bot ready handler
     dg.AddHandler(myBot.ReadyHandler)
@@ -61,6 +67,7 @@ func main() {
         return
     }
 
+    // monitor the page 
     go myBot.MonitorPageHandler(dg)
 
     // Wait here until CTRL-C or other term signal is received.
