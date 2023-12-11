@@ -31,7 +31,7 @@ func main() {
         slog.String("channel", NotificationsChannel),
         slog.String("page", PAGE_URL),
     ))
-
+    
     // Create a new Discord session using the provided bot token.
     flag.StringVar(&Token, "t", "", "Bot Token")
     flag.Parse()
