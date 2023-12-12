@@ -2,9 +2,7 @@ package bot
 
 import (
 	"fmt"
-	"io"
 	"log/slog"
-	"net/http"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -47,24 +45,30 @@ func (b *Bot) ReadyHandler(s *discordgo.Session, event *discordgo.Ready) {
 // Monitor a specific page for changes
 func (b *Bot) MonitorListenAndServe(s *discordgo.Session) {
 	// if the last response is empty we need to get the initial response.
-	_, err := b.monitorPage(b.config.MonitorUrl)
+	initResp, err := MonitorPage(b.config.MonitorUrl)
 	if err != nil {
 		slog.Error("request to monitor page failed for seeding initial data", "error", err)
 		return
 	}
+	// set the last response to the initial response
+	b.lastPageResponse = initResp
 
 	// loop for the duration of the program.
 	for range time.NewTicker(b.config.TickSpeed).C {
-		status, err := b.monitorPage(b.config.MonitorUrl)
+		resp, err := MonitorPage(b.config.MonitorUrl)
 		if err != nil {
 			slog.Error("monitor request failed", "url", b.config.MonitorUrl, "error", err)
 		}
 
-		if !status {
+		if resp == b.lastPageResponse {
 			slog.Info("monitor request, nothing has changed", b.config.MonitorUrl, slog.Bool("status", status))
 			continue
 		}
 
+		// if the response is different than the last response, set the last response to the new response.
+		b.lastPageResponse = resp
+
+		// if the response is the same as the last response, send a message to the updates channel.
 		guilds, err := s.UserGuilds(100, "", "")
 		if err != nil {
 			slog.Error("Could not get guilds", "error", err)
@@ -87,31 +91,6 @@ func (b *Bot) MonitorListenAndServe(s *discordgo.Session) {
 
 			slog.Info("message sent", "channel_id", channel.ID, "channel_name", channel.Name, "guild_id", guild.ID)
 		}
-	}
-}
-
-// ping the page and check if anything has changed.
-// it will return false if the page hasn't been checked in the past
-func (b *Bot) monitorPage(pageUrl string) (bool, error) {
-	response, err := http.Get(pageUrl)
-	if err != nil {
-		return false, err
-	}
-
-	defer response.Body.Close()
-
-	respBytes, err := io.ReadAll(response.Body)
-	if err != nil {
-		return false, err
-	}
-
-	slog.Info("page response", "status", response.Status, "content-length", response.ContentLength)
-
-	if b.lastPageResponse != string(respBytes) {
-		b.lastPageResponse = string(respBytes)
-		return true, nil
-	} else {
-		return false, nil
 	}
 }
 
