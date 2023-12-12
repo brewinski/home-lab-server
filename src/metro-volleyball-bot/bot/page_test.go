@@ -16,6 +16,11 @@ func TestMonitorPage(t *testing.T) {
 			args:    args{pageUrl: "https://www.google.com"},
 			wantErr: false,
 		},
+		{
+			name:    "TestMonitorPage will return an error if the page does not exist",
+			args:    args{pageUrl: "https://grumbo.dev/this-page-does-not-exist"},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
