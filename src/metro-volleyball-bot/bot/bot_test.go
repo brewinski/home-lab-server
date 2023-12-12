@@ -11,7 +11,7 @@ import (
 func TestBot_ReadyHandler(t *testing.T) {
 	type fields struct {
 		lastPageResponse string
-		config           Config
+		config           bot.Config
 	}
 	type args struct {
 		s     *discordgo.Session
@@ -27,23 +27,25 @@ func TestBot_ReadyHandler(t *testing.T) {
 			fields: fields{
 				lastPageResponse: "",
 				config: bot.Config{
-					MonitorUrl: "testing",
-					UpdatesChannel: "testing", 
-					TickSpeed: 1 * time.Second,
+					MonitorUrl:     "testing",
+					UpdatesChannel: "testing",
+					TickSpeed:      1 * time.Second,
 				},
 			},
 			args: args{
 				&discordgo.Session{},
-				
+				&discordgo.Ready{},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			b := &Bot{
-				lastPageResponse: tt.fields.lastPageResponse,
-				config:           tt.fields.config,
-			}
+			b := bot.New(bot.Config{
+				MonitorUrl:     tt.fields.config.MonitorUrl,
+				UpdatesChannel: tt.fields.config.UpdatesChannel,
+				TickSpeed:      tt.fields.config.TickSpeed,
+			})
+
 			b.ReadyHandler(tt.args.s, tt.args.event)
 		})
 	}
