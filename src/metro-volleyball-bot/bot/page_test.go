@@ -21,6 +21,11 @@ func TestMonitorPage(t *testing.T) {
 			args:    args{pageUrl: "https://grumbo.dev/this-page-does-not-exist"},
 			wantErr: true,
 		},
+		{
+			name:    "TestMonitorPage will return an error if the page is not a valid url",
+			args:    args{pageUrl: "this-is-not-a-valid-url"},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
