@@ -10,7 +10,7 @@
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}/src/metro-volleyball-bot/main.go",
-      "args": "-t MTE2ODMxNDA4NTE1MTEwMDk4OA.G5pIeG.hfqGGjZuQDOWoA2yYatNfQy0oLe0YJuaGLPnpY"
+      "args": "-t <ENV>"
     }
   ]
 }
