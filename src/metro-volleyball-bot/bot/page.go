@@ -5,11 +5,13 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"sync"
 )
 
 type Web struct {
 	client       *http.Client
 	prevResponse string
+	mu           sync.Mutex
 }
 
 type WebConfig struct {
@@ -20,6 +22,7 @@ func NewWeb(config WebConfig) *Web {
 	return &Web{
 		config.Client,
 		"",
+		sync.Mutex{},
 	}
 }
 
@@ -29,7 +32,10 @@ func (w *Web) CheckPageForChanges(url string) (bool, error) {
 		return false, fmt.Errorf("CheckPageForChanges() request failed, got: %w", err)
 	}
 
+	w.mu.Lock()
+	defer w.mu.Unlock()
 	if w.prevResponse == "" {
+
 		w.prevResponse = response
 		return false, nil
 	}
