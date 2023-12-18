@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 func TestMonitorPage(t *testing.T) {
@@ -201,5 +202,23 @@ func TestWeb_CheckPageForChanges(t *testing.T) {
 				t.Errorf("Web.CheckPageForChanges() = %v, want %v", w.prevResponse, tt.wantLastPageResponse)
 			}
 		})
+	}
+}
+
+func TestWeb_CheckPageForChangesRace(t *testing.T) {
+	t.Parallel()
+
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(time.Now().String()))
+	}))
+	defer testServer.Close()
+
+	w := &Web{
+		client:       &http.Client{},
+		prevResponse: "",
+	}
+
+	for i := 0; i < 1000; i++ {
+		go w.CheckPageForChanges(testServer.URL)
 	}
 }
