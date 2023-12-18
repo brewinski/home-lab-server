@@ -32,9 +32,11 @@ func (w *Web) CheckPageForChanges(url string) (bool, error) {
 		return false, fmt.Errorf("CheckPageForChanges() request failed, got: %w", err)
 	}
 
-	// w.mu.Lock()
-	// defer w.mu.Unlock()
-	fmt.Println("response", response)
+	// lock the mutex before reading / writing to shared memory.
+	// used for cases where this object might be used in a concurrent environment.
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
 	if w.prevResponse == "" {
 
 		w.prevResponse = response
