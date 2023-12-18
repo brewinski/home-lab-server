@@ -16,11 +16,11 @@ import (
 var (
 	Token     string
 	TickSpeed time.Duration
+	PageUrl   string
 )
 
 const (
 	NotificationsChannel = "metro-volleyball-notifications"
-	PageUrl              = "https://www.vq.org.au/competitions/metro-league/"
 )
 
 func main() {
@@ -28,6 +28,8 @@ func main() {
 	flag.StringVar(&Token, "t", "", "The token for the specific discord application.")
 	// Read the page check frequency duration. Parsed as "1ms", "1ns", "1s", "1m", or "1h"
 	flag.DurationVar(&TickSpeed, "ts", 1*time.Hour, "Page ping frequency as a string duration")
+	// Page URL to monitor
+	flag.StringVar(&PageUrl, "url", PageUrl, "The URL to monitor for changes")
 	// Parse the flags from the command line
 	flag.Parse()
 
