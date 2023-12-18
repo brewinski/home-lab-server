@@ -3,6 +3,7 @@ package bot
 import (
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 	"time"
 )
@@ -217,8 +218,16 @@ func TestWeb_CheckPageForChangesRace(t *testing.T) {
 		client:       &http.Client{},
 		prevResponse: "",
 	}
+	workers := 1000
+	var wg sync.WaitGroup
+	wg.Add(workers)
 
-	for i := 0; i < 1000; i++ {
-		go w.CheckPageForChanges(testServer.URL)
+	for i := 0; i < workers; i++ {
+		go func() {
+			w.CheckPageForChanges(testServer.URL)
+			wg.Done()
+		}()
 	}
+
+	wg.Wait()
 }
