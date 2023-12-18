@@ -7,6 +7,7 @@ import (
 )
 
 func TestMonitorPage(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		pageUrl string
 	}
@@ -32,7 +33,9 @@ func TestMonitorPage(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			_, err := MonitorPage(tt.args.pageUrl)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("MonitorPage() error = %v, wantErr %v", err, tt.wantErr)
@@ -43,6 +46,7 @@ func TestMonitorPage(t *testing.T) {
 }
 
 func TestWeb_MonitorPage(t *testing.T) {
+	t.Parallel()
 	type fields struct {
 		client  *http.Client
 		handler http.HandlerFunc
@@ -79,7 +83,9 @@ func TestWeb_MonitorPage(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			testServer := httptest.NewServer(tt.fields.handler)
 			defer testServer.Close()
 
@@ -100,6 +106,7 @@ func TestWeb_MonitorPage(t *testing.T) {
 }
 
 func TestWeb_CheckPageForChanges(t *testing.T) {
+	t.Parallel()
 	type fields struct {
 		client       *http.Client
 		prevResponse string
@@ -172,7 +179,9 @@ func TestWeb_CheckPageForChanges(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			testServer := httptest.NewServer(tt.fields.handler)
 			defer testServer.Close()
 
