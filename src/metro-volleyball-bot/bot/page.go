@@ -8,7 +8,8 @@ import (
 )
 
 type Web struct {
-	client *http.Client
+	client       *http.Client
+	prevResponse string
 }
 
 type WebConfig struct {
@@ -18,7 +19,27 @@ type WebConfig struct {
 func NewWeb(config WebConfig) *Web {
 	return &Web{
 		config.Client,
+		"",
 	}
+}
+
+func (w *Web) CheckPageForChanges(url string) (bool, error) {
+	response, err := w.MonitorPage(url)
+	if err != nil {
+		return false, fmt.Errorf("CheckPageForChanges() request failed, got: %w", err)
+	}
+
+	if w.prevResponse == "" {
+		w.prevResponse = response
+		return false, nil
+	}
+
+	if w.prevResponse == response {
+		return false, nil
+	}
+
+	w.prevResponse = response
+	return true, nil
 }
 
 // MonitorPage will monitor a specific page for changes.
@@ -28,11 +49,11 @@ func (w *Web) MonitorPage(pageUrl string) (string, error) {
 		return "", fmt.Errorf("MonitorPage() request failed, got: %w", err)
 	}
 
+	defer response.Body.Close()
+
 	if response.StatusCode < 200 || response.StatusCode > 299 {
 		return "", fmt.Errorf("MonitorPage() response status code, got: %d", response.StatusCode)
 	}
-
-	defer response.Body.Close()
 
 	respBytes, err := io.ReadAll(response.Body)
 	if err != nil {
