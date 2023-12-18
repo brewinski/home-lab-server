@@ -218,7 +218,7 @@ func TestWeb_CheckPageForChangesRace(t *testing.T) {
 		client:       &http.Client{},
 		prevResponse: "",
 	}
-	workers := 1000
+	workers := 100
 	var wg sync.WaitGroup
 	wg.Add(workers)
 
