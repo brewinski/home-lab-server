@@ -61,7 +61,7 @@ func (b *Bot) MonitorListenAndServe(s *discordgo.Session) {
 		}
 
 		if resp == b.lastPageResponse {
-			slog.Info("monitor request, nothing has changed", b.config.MonitorUrl, "response", resp)
+			slog.Info("monitor request, nothing has changed", "url", b.config.MonitorUrl, "response", resp)
 			continue
 		}
 
