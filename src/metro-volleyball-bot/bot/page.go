@@ -32,8 +32,9 @@ func (w *Web) CheckPageForChanges(url string) (bool, error) {
 		return false, fmt.Errorf("CheckPageForChanges() request failed, got: %w", err)
 	}
 
-	w.mu.Lock()
-	defer w.mu.Unlock()
+	// w.mu.Lock()
+	// defer w.mu.Unlock()
+	fmt.Println("response", response)
 	if w.prevResponse == "" {
 
 		w.prevResponse = response
