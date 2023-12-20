@@ -42,56 +42,36 @@ func (b *Bot) ReadyHandler(s *discordgo.Session, event *discordgo.Ready) {
 	}
 }
 
-// Monitor a specific page for changes
-func (b *Bot) MonitorListenAndServe(s *discordgo.Session) {
-	// if the last response is empty we need to get the initial response.
-	initResp, err := MonitorPage(b.config.MonitorUrl)
+func (b *Bot) PdfChangesHandler(s *discordgo.Session, message string) ([]*discordgo.Message, []error) {
+	// Get a list of all the guilds that are available for messages
+	guilds, err := s.UserGuilds(100, "", "")
 	if err != nil {
-		slog.Error("request to monitor page failed for seeding initial data", "error", err)
-		return
+		return nil, []error{fmt.Errorf("unable to list guilds: %w", err)}
 	}
-	// set the last response to the initial response
-	b.lastPageResponse = initResp
 
-	// loop for the duration of the program.
-	for range time.NewTicker(b.config.TickSpeed).C {
-		resp, err := MonitorPage(b.config.MonitorUrl)
+	var errors []error
+	var messages []*discordgo.Message
+
+	// Send a message to each guild
+	for _, guild := range guilds {
+		channel, err := createChannelIfNotExists(s, guild.ID, b.config.UpdatesChannel)
 		if err != nil {
-			slog.Error("monitor request failed", "url", b.config.MonitorUrl, "error", err)
-		}
-
-		if resp == b.lastPageResponse {
-			slog.Info("monitor request, nothing has changed", "url", b.config.MonitorUrl, "response", resp)
+			errors = append(errors, fmt.Errorf("unable to create channel: %w, guild[%s]", err, guild.Name))
 			continue
 		}
 
-		// if the response is different than the last response, set the last response to the new response.
-		b.lastPageResponse = resp
-
-		// if the response is the same as the last response, send a message to the updates channel.
-		guilds, err := s.UserGuilds(100, "", "")
+		message, err := s.ChannelMessageSend(channel.ID, message)
 		if err != nil {
-			slog.Error("Could not get guilds", "error", err)
+			// if the message fails to send, add the error to the list of errors and continue to the next guild
+			errors = append(errors, fmt.Errorf("unable to send message: %w, guild[%s], channel[%s]", err, guild.Name, channel.Name))
 			continue
 		}
 
-		for _, guild := range guilds {
-			channel, err := createChannelIfNotExists(s, guild.ID, b.config.UpdatesChannel)
-			if err != nil {
-				slog.Error("Could not create channel", "error", err, "guild_id", guild.ID)
-				continue
-			}
-
-			slog.Info("message sending", "channel_id", channel.ID, "channel_name", channel.Name, "guild_id", guild.ID)
-
-			s.ChannelMessageSend(
-				channel.ID,
-				fmt.Sprintf("monitored page has changed, go to %s and review the changes", b.config.MonitorUrl),
-			)
-
-			slog.Info("message sent", "channel_id", channel.ID, "channel_name", channel.Name, "guild_id", guild.ID)
-		}
+		// add the successful message to the list of messages to be returned
+		messages = append(messages, message)
 	}
+
+	return messages, errors
 }
 
 // creates the updates channel if it doesn't already exist

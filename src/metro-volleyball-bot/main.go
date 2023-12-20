@@ -2,13 +2,16 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/brewinski/home-lab-server/src/metro-volleyball-bot/bot"
+	"github.com/brewinski/home-lab-server/src/metro-volleyball-bot/monitor"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -46,6 +49,8 @@ func main() {
 		slog.Error("new discord session", "error", err)
 		return
 	}
+	// Cleanly close down the Discord session.
+	defer dg.Close()
 
 	myBot := bot.New(bot.Config{
 		UpdatesChannel: NotificationsChannel,
@@ -53,8 +58,10 @@ func main() {
 		MonitorUrl:     PageUrl,
 	})
 
-	// get initial page data
-	// myBot.
+	// create new http client
+	httpClient := http.Client{
+		Timeout: 10 * time.Second,
+	}
 
 	// register the bot ready handler
 	dg.AddHandler(myBot.ReadyHandler)
@@ -69,19 +76,56 @@ func main() {
 		return
 	}
 
-	// monitor the page
-	go myBot.MonitorListenAndServe(dg)
+	// Draw Pdf monitor
+	pdfMonitor := monitor.New(monitor.Config{
+		Client: &httpClient,
+	})
+	// make initial request for pdf data
+	_, _, err = pdfMonitor.CheckForChanges(PageUrl)
+	if err != nil {
+		slog.Error("pdf initial data request failed", "error", err)
+	}
 
-	// Wait here until CTRL-C or other term signal is received.
 	slog.Info("bot is running. press ctrl-c to exit.")
-
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, syscall.SIGTERM)
-	<-sc
 
-	// Cleanly close down the Discord session.
-	dg.Close()
+	for {
+		select {
+		case <-time.NewTicker(TickSpeed).C:
+			// monitor the draw pdf page
+			handlePDFChanges(pdfMonitor, myBot, dg)
+		case <-sc:
+			// Wait until CTRL-C or other term signal is received.
+			slog.Info("termination signal received, bot stopping...")
+			return
+		}
+	}
 
-	// notify that a
-	slog.Info("termination signal recieved, bot stopping...")
+}
+
+func handlePDFChanges(m *monitor.DataSourceMonitor, bot *bot.Bot, s *discordgo.Session) {
+	pdfUpdate, _, err := m.CheckForChanges(PageUrl)
+	if err != nil {
+		slog.Error("pdf monitor check for changes", "error", err)
+	}
+
+	if !pdfUpdate {
+		slog.Info("pdf monitor check no changes", "update", pdfUpdate)
+		return
+	}
+
+	slog.Info("pdf monitor check for changes", "update", pdfUpdate)
+
+	messages, errs := bot.PdfChangesHandler(s, fmt.Sprintf("PDF changed, go to %s and review the changes", PageUrl))
+
+	// log any errors that occurred
+	for _, err := range errs {
+		slog.Error("pdf changes handler message failures", "error", err)
+	}
+
+	// log the messages that were sent
+	for _, message := range messages {
+		slog.Info("pdf changes handler message successes", "message", message)
+	}
 }
