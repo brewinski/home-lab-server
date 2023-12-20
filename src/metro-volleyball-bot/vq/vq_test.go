@@ -43,7 +43,7 @@ func TestClient_GetGames(t *testing.T) {
 			// 	t.Errorf("Client.GetGames() = %v, want %v", got, tt.want)
 			// }
 
-			teamGamesMap := map[string][]vq.Game{}
+			teamGamesMap := map[string][]vq.GameRecord{}
 
 			for _, game := range got.Records {
 				teamGamesMap[game.Fields.TeamA] = append(teamGamesMap[game.Fields.TeamA], game)
@@ -97,7 +97,7 @@ func TestClient_GetGamesByTeam(t *testing.T) {
 			// 	t.Errorf("Client.GetGamesByTeam() = %v, want %v", got, tt.want)
 			// }
 
-			futureGames := []vq.Game{}
+			futureGames := []vq.GameRecord{}
 			for _, game := range got.Records {
 				// fmt.Printf("%s vs %s, at %s on %s\n", game.Fields.TeamA, game.Fields.TeamB, game.Fields.GameTime, game.Fields.GameDay)
 				gameTime, err := game.ParseGameDayTime()
@@ -164,7 +164,7 @@ func TestClient_GetGamesByTeamAndDuty(t *testing.T) {
 			// 	t.Errorf("Client.GetGamesByTeamAndDuty() = %v, want %v", got, tt.want)
 			// }
 
-			futureGames := []vq.Game{}
+			futureGames := []vq.GameRecord{}
 			for _, game := range got.Records {
 				// fmt.Printf("%s vs %s, at %s on %s\n", game.Fields.TeamA, game.Fields.TeamB, game.Fields.GameTime, game.Fields.GameDay)
 				gameTime, err := game.ParseGameDayTime()

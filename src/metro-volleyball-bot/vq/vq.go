@@ -37,14 +37,8 @@ type ClientConfig struct {
 }
 
 type GetGameResponseBody struct {
-	Records []Game `json:"records"`
-	Offset  string `json:"offset"`
-}
-
-func NewClient(config ClientConfig) *Client {
-	return &Client{
-		config.Client,
-	}
+	Records []GameRecord `json:"records"`
+	Offset  string       `json:"offset"`
 }
 
 type GetGamesRequestBody struct {
@@ -55,6 +49,12 @@ type GetGamesRequestBody struct {
 	View            string `json:"view"`
 	FilterByFormula string `json:"filter_by_formula"`
 	Offset          string `json:"offset"`
+}
+
+func NewClient(config ClientConfig) *Client {
+	return &Client{
+		config.Client,
+	}
 }
 
 func (c *Client) GetGamesByTeamAndDuty(limit int, offset, team string) (GetGameResponseBody, error) {
@@ -150,16 +150,16 @@ type GetLadderRequestBody struct {
 }
 
 type GetLadderResponseBody struct {
-	Records []Record `json:"records"`
-	Offset  string   `json:"offset"`
+	Records []LadderRecord `json:"records"`
+	Offset  string         `json:"offset"`
 }
 
-type Record struct {
-	ID     string         `json:"id"`
-	Fields TeamAggregates `json:"fields"`
+type LadderRecord struct {
+	ID     string       `json:"id"`
+	Fields LadderFields `json:"fields"`
 }
 
-type TeamAggregates struct {
+type LadderFields struct {
 	LinkedTeam               string `json:"Linked Team"`
 	MatchesA                 string `json:"MatchesA"`
 	MatchesB                 string `json:"MatchesB"`
@@ -319,12 +319,12 @@ type GameFields struct {
 	Competition          string `json:"Competition"`
 }
 
-type Game struct {
+type GameRecord struct {
 	ID     string     `json:"id"`
 	Fields GameFields `json:"fields"`
 }
 
-func (g Game) ParseGameDayTime() (time.Time, error) {
+func (g GameRecord) ParseGameDayTime() (time.Time, error) {
 	gameDayTime := fmt.Sprintf("%s %s", g.Fields.GameDay, g.Fields.GameTime)
 	return time.Parse("2/1/2006 3:04pm", gameDayTime)
 }
