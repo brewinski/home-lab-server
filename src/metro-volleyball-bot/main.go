@@ -153,6 +153,7 @@ func handleLadderChangesFactory(vqClient *vq.Client, bot *bot.Bot, s *discordgo.
 		ladderUpdate, err := vqClient.GetLadder()
 		if err != nil {
 			slog.Error("unable to request ladder data from server", "error", err)
+			return
 		}
 
 		if LadderHasChanged(ladderUpdate, currentLadder) {
