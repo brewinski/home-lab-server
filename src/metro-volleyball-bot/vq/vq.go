@@ -10,8 +10,14 @@ import (
 )
 
 const (
-	apiUrl       = "https://vqmetro23s3.softr.app/v1/integrations/airtable/67a0cea2-90f1-4d07-8903-89cda40f4264/appdBNmBQcBRBqB3P/Competition%20Manager/records?block_id=77226c67-17e8-4238-b983-db7105c48dfe"
+	// TODO: replace api url with vq api url / env var
+	apiUrl = "https://vqmetro23s3.softr.app/v1/integrations/airtable/67a0cea2-90f1-4d07-8903-89cda40f4264/appdBNmBQcBRBqB3P/Competition%20Manager/records?block_id=77226c67-17e8-4238-b983-db7105c48dfe"
+	// TODO: replace ladder api url with vq api url / env var
 	ladderApiUrl = "https://vqmetro23s3.softr.app/v1/integrations/airtable/67a0cea2-90f1-4d07-8903-89cda40f4264/appdBNmBQcBRBqB3P/Ladder/records?block_id=582e2243-42bb-4233-a84a-ddf9fc5361e1"
+	// TODO: use these vars combined to document the api and paths.
+	vqAPIUrl        = "https://vqmetro23s3.softr.app/v1/integrations/airtable/67a0cea2-90f1-4d07-8903-89cda40f4264/appdBNmBQcBRBqB3P"
+	competitionPath = "/Competition%20Manager/records?block_id=77226c67-17e8-4238-b983-db7105c48dfe"
+	ladderPath      = "/Ladder/records?block_id=582e2243-42bb-4233-a84a-ddf9fc5361e1"
 )
 
 var (
