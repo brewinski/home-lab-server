@@ -42,7 +42,7 @@ func (b *Bot) ReadyHandler(s *discordgo.Session, event *discordgo.Ready) {
 	}
 }
 
-func (b *Bot) PdfChangesHandler(s *discordgo.Session, message string) ([]*discordgo.Message, []error) {
+func (b *Bot) ChangeHandler(s *discordgo.Session, message string) ([]*discordgo.Message, []error) {
 	// Get a list of all the guilds that are available for messages
 	guilds, err := s.UserGuilds(100, "", "")
 	if err != nil {

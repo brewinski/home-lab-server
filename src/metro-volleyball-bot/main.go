@@ -7,11 +7,13 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
 	"github.com/brewinski/home-lab-server/src/metro-volleyball-bot/bot"
 	"github.com/brewinski/home-lab-server/src/metro-volleyball-bot/monitor"
+	"github.com/brewinski/home-lab-server/src/metro-volleyball-bot/vq"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -76,6 +78,7 @@ func main() {
 		return
 	}
 
+	// create monitor deps and start monitoring
 	// Draw Pdf monitor
 	pdfMonitor := monitor.New(monitor.Config{
 		Client: &httpClient,
@@ -86,6 +89,14 @@ func main() {
 		slog.Error("pdf initial data request failed", "error", err)
 	}
 
+	// volleyball qld client
+	vqClient := vq.NewClient(vq.ClientConfig{
+		Client: &httpClient,
+	})
+
+	// create ladder changes handler
+	handleLadderChanges := handleLadderChangesFactory(vqClient, myBot, dg)
+
 	slog.Info("bot is running. press ctrl-c to exit.")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, syscall.SIGTERM)
@@ -95,6 +106,7 @@ func main() {
 		case <-time.NewTicker(TickSpeed).C:
 			// monitor the draw pdf page
 			handlePDFChanges(pdfMonitor, myBot, dg)
+			handleLadderChanges()
 		case <-sc:
 			// Wait until CTRL-C or other term signal is received.
 			slog.Info("termination signal received, bot stopping...")
@@ -117,7 +129,7 @@ func handlePDFChanges(m *monitor.DataSourceMonitor, bot *bot.Bot, s *discordgo.S
 
 	slog.Info("pdf monitor check for changes", "update", pdfUpdate)
 
-	messages, errs := bot.PdfChangesHandler(s, fmt.Sprintf("PDF changed, go to %s and review the changes", PageUrl))
+	messages, errs := bot.ChangeHandler(s, fmt.Sprintf("PDF changed, go to %s and review the changes", PageUrl))
 
 	// log any errors that occurred
 	for _, err := range errs {
@@ -128,4 +140,85 @@ func handlePDFChanges(m *monitor.DataSourceMonitor, bot *bot.Bot, s *discordgo.S
 	for _, message := range messages {
 		slog.Info("pdf changes handler message successes", "message", message)
 	}
+}
+
+func handleLadderChangesFactory(vqClient *vq.Client, bot *bot.Bot, s *discordgo.Session) func() {
+	currentLadder, err := vqClient.GetLadder()
+	if err != nil {
+		slog.Error("unable to request initial ladder data from server", "error", err)
+	}
+
+	return func() {
+		ladderUpdate, err := vqClient.GetLadder()
+		if err != nil {
+			slog.Error("unable to request ladder data from server", "error", err)
+		}
+
+		if LadderHasChanged(ladderUpdate, currentLadder) {
+			slog.Info("ladder monitor check no changes", "update", ladderUpdate)
+			return
+		}
+
+		slog.Info("ladder monitor detected changes", "update", ladderUpdate)
+
+		// set the current ladder to the new ladder
+		currentLadder = ladderUpdate
+
+		sb := strings.Builder{}
+
+		sb.WriteString(fmt.Sprintf("Ladder changed: %s\n\n", "https://vqmetro23s3.softr.app/ladder-m1 ```"))
+
+		for _, team := range ladderUpdate.Records {
+			fields := team.Fields
+			sb.WriteString(fmt.Sprintf("%s. %s\n", fields.Rank, team.Fields.TeamNameLookup))
+			sb.WriteString(fmt.Sprintf("\tpoints: %s\n", fields.CompetitionPoints))
+			sb.WriteString(fmt.Sprintf("\tnext game: %s\n", fields.NextMatch_Detail))
+			sb.WriteString("\n")
+		}
+
+		sb.WriteString("```")
+
+		fmt.Println(sb.String())
+
+		messages, errs := bot.ChangeHandler(s, sb.String())
+
+		// log any errors that occurred
+		for _, err := range errs {
+			slog.Error("ladder changes handler message failures", "error", err)
+		}
+
+		// log the messages that were sent
+		for _, message := range messages {
+			slog.Info("ladder changes handler message successes", "message", message)
+		}
+	}
+}
+
+func LadderHasChanged(new, old vq.GetLadderResponseBody) bool {
+	newRecords, oldRecords := new.Records, old.Records
+
+	if len(new.Records) != len(old.Records) {
+		return true
+	}
+
+	for i, newRecord := range newRecords {
+		oldRecord := oldRecords[i]
+
+		if newRecord.Fields.Rank != oldRecord.Fields.Rank {
+			slog.Info("rank changed", "new", newRecord.Fields.Rank, "old", oldRecord.Fields.Rank)
+			return true
+		}
+
+		if newRecord.Fields.TeamNameLookup != oldRecord.Fields.TeamNameLookup {
+			slog.Info("team name changed", "new", newRecord.Fields.TeamNameLookup, "old", oldRecord.Fields.TeamNameLookup)
+			return true
+		}
+
+		if newRecord.Fields.CompetitionPoints != oldRecord.Fields.CompetitionPoints {
+			slog.Info("competition points changed", "new", newRecord.Fields.CompetitionPoints, "old", oldRecord.Fields.CompetitionPoints)
+			return true
+		}
+	}
+
+	return false
 }
