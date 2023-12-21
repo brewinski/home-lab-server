@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"reflect"
 	"strings"
 	"syscall"
 	"time"
@@ -154,7 +155,7 @@ func handleLadderChangesFactory(vqClient *vq.Client, bot *bot.Bot, s *discordgo.
 			return
 		}
 
-		if LadderHasChanged(ladderUpdate, currentLadder) {
+		if reflect.DeepEqual(ladderUpdate, currentLadder) {
 			slog.Info("ladder monitor check no changes", "update", ladderUpdate)
 			return
 		}
@@ -192,33 +193,4 @@ func handleLadderChangesFactory(vqClient *vq.Client, bot *bot.Bot, s *discordgo.
 			slog.Info("ladder changes handler message successes", "message", message)
 		}
 	}
-}
-
-func LadderHasChanged(new, old vq.GetLadderResponseBody) bool {
-	newRecords, oldRecords := new.Records, old.Records
-
-	if len(new.Records) != len(old.Records) {
-		return true
-	}
-
-	for i, newRecord := range newRecords {
-		oldRecord := oldRecords[i]
-
-		if newRecord.Fields.Rank != oldRecord.Fields.Rank {
-			slog.Info("rank changed", "new", newRecord.Fields.Rank, "old", oldRecord.Fields.Rank)
-			return true
-		}
-
-		if newRecord.Fields.TeamNameLookup != oldRecord.Fields.TeamNameLookup {
-			slog.Info("team name changed", "new", newRecord.Fields.TeamNameLookup, "old", oldRecord.Fields.TeamNameLookup)
-			return true
-		}
-
-		if newRecord.Fields.CompetitionPoints != oldRecord.Fields.CompetitionPoints {
-			slog.Info("competition points changed", "new", newRecord.Fields.CompetitionPoints, "old", oldRecord.Fields.CompetitionPoints)
-			return true
-		}
-	}
-
-	return false
 }
