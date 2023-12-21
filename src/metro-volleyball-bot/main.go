@@ -61,6 +61,19 @@ func main() {
 
 	// register the bot ready handler
 	dg.AddHandler(myBot.ReadyHandler)
+	// commands handler
+	commandHandler := bot.OnCommandHandlerFactory(func(command string) (string, error) {
+		switch command {
+		case "vb-help":
+			return "no action registered for this command: " + command, nil
+		case "vb-ladder":
+			return ladderGet()
+		default:
+			// Create the response object
+			return "no action registered for this command" + command, nil
+		}
+	})
+	dg.AddHandler(commandHandler)
 
 	// In this example, we only care about receiving message events.
 	dg.Identify.Intents = discordgo.IntentsGuildMessages
@@ -77,6 +90,8 @@ func main() {
 		return
 	}
 
+	// register volleybot commands
+	bot.RegisterCommands(dg)
 	// create monitor deps and start monitoring
 	// Draw Pdf monitor
 	pdfMonitor := monitor.New(monitor.Config{
@@ -108,6 +123,12 @@ func main() {
 			handleLadderChanges()
 		case <-sc:
 			// Wait until CTRL-C or other term signal is received.
+			slog.Info("removing registered commands")
+			err := bot.RemoveCommands(dg)
+			if err != nil {
+				slog.Error("remove commands", "error", err)
+			}
+
 			slog.Info("termination signal received, bot stopping...")
 			return
 		}
@@ -139,6 +160,36 @@ func handlePDFChanges(m *monitor.DataSourceMonitor, bot *bot.Bot, s *discordgo.S
 	for _, message := range messages {
 		slog.Info("pdf changes handler message successes", "message", message)
 	}
+}
+
+func ladderGet() (string, error) {
+	vqClient := vq.NewClient(vq.ClientConfig{
+		Client: &http.Client{
+			Timeout: 10 * time.Second,
+		},
+	})
+
+	ladder, err := vqClient.GetLadder()
+	if err != nil {
+		slog.Error("unable to request initial ladder data from server", "error", err)
+		return "", err
+	}
+
+	sb := strings.Builder{}
+
+	sb.WriteString(fmt.Sprintf("Ladder changed: %s\n\n", "https://vqmetro23s3.softr.app/ladder-m1 ```"))
+
+	for _, team := range ladder.Records {
+		fields := team.Fields
+		sb.WriteString(fmt.Sprintf("%s. %s\n", fields.Rank, team.Fields.TeamNameLookup))
+		sb.WriteString(fmt.Sprintf("\tpoints: %s\n", fields.CompetitionPoints))
+		sb.WriteString(fmt.Sprintf("\tnext game: %s\n", fields.NextMatch_Detail))
+		sb.WriteString("\n")
+	}
+
+	sb.WriteString("```")
+
+	return sb.String(), nil
 }
 
 func handleLadderChangesFactory(vqClient *vq.Client, bot *bot.Bot, s *discordgo.Session) func() {
