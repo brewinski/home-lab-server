@@ -60,16 +60,16 @@ func main() {
 		MonitorUrl:     PageUrl,
 	})
 
-	// create new http client
-	httpClient := http.Client{
-		Timeout: 10 * time.Second,
-	}
-
 	// register the bot ready handler
 	dg.AddHandler(myBot.ReadyHandler)
 
 	// In this example, we only care about receiving message events.
 	dg.Identify.Intents = discordgo.IntentsGuildMessages
+
+	// create new http client
+	httpClient := http.Client{
+		Timeout: 10 * time.Second,
+	}
 
 	// Open a websocket connection to Discord and begin listening.
 	err = dg.Open()
