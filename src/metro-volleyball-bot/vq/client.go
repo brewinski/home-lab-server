@@ -36,10 +36,12 @@ var (
 
 type Client struct {
 	client *http.Client
+	apiUrl string
 }
 
 type ClientConfig struct {
 	Client *http.Client
+	ApiUrl string
 }
 
 type GetGameResponseBody struct {
@@ -58,8 +60,15 @@ type GetGamesRequestBody struct {
 }
 
 func NewClient(config ClientConfig) *Client {
+	if config.Client == nil {
+		config.Client = &http.Client{
+			Timeout: 10 * time.Second,
+		}
+	}
+
 	return &Client{
 		config.Client,
+		config.ApiUrl,
 	}
 }
 
