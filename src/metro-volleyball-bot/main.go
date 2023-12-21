@@ -177,7 +177,7 @@ func ladderGet() (string, error) {
 
 	sb := strings.Builder{}
 
-	sb.WriteString(fmt.Sprintf("Ladder changed: %s\n\n", "https://vqmetro23s3.softr.app/ladder-m1 ```"))
+	sb.WriteString(fmt.Sprintf("Ladder: %s\n\n", "https://vqmetro23s3.softr.app/ladder-m1 ```"))
 
 	for _, team := range ladder.Records {
 		fields := team.Fields
