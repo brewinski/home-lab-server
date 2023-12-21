@@ -25,4 +25,4 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-X main.GitCommit=$(RAILWAY_GIT_
 # 
 
 # Run
-CMD /out -t $DISCORD_TOKEN -ts $TICK_SPEED -url $MONITOR_URL
+CMD /out -t $DISCORD_TOKEN -ts $TICK_SPEED -url $MONITOR_URL --channel $NOTIFICATION_CHANNEL

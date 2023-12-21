@@ -19,13 +19,10 @@ import (
 
 // Variables used for command line parameters
 var (
-	Token     string
-	TickSpeed time.Duration
-	PageUrl   string
-)
-
-const (
-	NotificationsChannel = "metro-volleyball-notifications"
+	Token                string
+	TickSpeed            time.Duration
+	PageUrl              string
+	NotificationsChannel string
 )
 
 func main() {
@@ -36,6 +33,7 @@ func main() {
 	// Page URL to monitor
 	flag.StringVar(&PageUrl, "url", PageUrl, "The URL to monitor for changes")
 	// Parse the flags from the command line
+	flag.StringVar(&NotificationsChannel, "channel", "", "The channel to send notifications")
 	flag.Parse()
 
 	// set json as the default logger
