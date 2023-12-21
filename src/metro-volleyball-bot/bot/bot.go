@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/brewinski/home-lab-server/src/metro-volleyball-bot/flags"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -38,7 +39,10 @@ func (b *Bot) ReadyHandler(s *discordgo.Session, event *discordgo.Ready) {
 			continue
 		}
 
-		s.ChannelMessageSend(channel.ID, fmt.Sprintf("metro bot ready, monitoring page: %s", b.config.MonitorUrl)) // add some emojis
+		// send a ready message if the feature flag is enabled
+		if flags.BotReadyMessage {
+			s.ChannelMessageSend(channel.ID, fmt.Sprintf("metro bot ready, monitoring page: %s", b.config.MonitorUrl)) // add some emojis
+		}
 	}
 }
 
