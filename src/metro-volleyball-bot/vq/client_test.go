@@ -3,6 +3,8 @@ package vq_test
 import (
 	"fmt"
 	"net/http"
+	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -24,7 +26,6 @@ func TestClient_GetGames(t *testing.T) {
 			fields: fields{
 				client: &http.Client{},
 			},
-			want:    vq.GetGameResponseBody{},
 			wantErr: false,
 		},
 	}
@@ -33,22 +34,34 @@ func TestClient_GetGames(t *testing.T) {
 			c := vq.NewClient(vq.ClientConfig{
 				Client: tt.fields.client,
 			})
-			got, err := c.GetGames(100, "")
+			got, err := c.GetGames(2, "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Client.GetGames() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			// TODO: bring this back for real tests
-			// if !reflect.DeepEqual(got, tt.want) {
-			// 	t.Errorf("Client.GetGames() = %v, want %v", got, tt.want)
-			// }
 
-			teamGamesMap := map[string][]vq.GameRecord{}
-
-			for _, game := range got.Records {
-				teamGamesMap[game.Fields.TeamA] = append(teamGamesMap[game.Fields.TeamA], game)
-				teamGamesMap[game.Fields.TeamB] = append(teamGamesMap[game.Fields.TeamB], game)
+			if len(got.Records) > 2 {
+				t.Errorf("Client.GetGames() length is greater than requested limit limit = 2, got %d", len(got.Records))
+				return
 			}
+
+			// if we didn't get an offset we can't test it.
+			if got.Offset == "" {
+				return
+			}
+
+			// test the offset works.
+			gotOffset, err := c.GetGames(2, got.Offset)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Client.GetGames() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if reflect.DeepEqual(got, gotOffset) {
+				t.Errorf("Client.GetGames() should be different got = %v, want %v", got, gotOffset)
+				return
+			}
+
 		})
 	}
 }
@@ -145,7 +158,6 @@ func TestClient_GetGamesByTeamAndDuty(t *testing.T) {
 				offset: "",
 				team:   "apg",
 			},
-			want:    vq.GetGameResponseBody{},
 			wantErr: false,
 		},
 	}
@@ -160,28 +172,25 @@ func TestClient_GetGamesByTeamAndDuty(t *testing.T) {
 				t.Errorf("Client.GetGamesByTeamAndDuty() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			// if !reflect.DeepEqual(got, tt.want) {
-			// 	t.Errorf("Client.GetGamesByTeamAndDuty() = %v, want %v", got, tt.want)
-			// }
 
-			futureGames := []vq.GameRecord{}
 			for _, game := range got.Records {
-				// fmt.Printf("%s vs %s, at %s on %s\n", game.Fields.TeamA, game.Fields.TeamB, game.Fields.GameTime, game.Fields.GameDay)
-				gameTime, err := game.ParseGameDayTime()
-				if err != nil {
-					t.Errorf("Client.GetGamesByTeam() error = %v, wantErr %v", err, tt.wantErr)
+				lowerTeam := strings.ToLower(tt.args.team)
+				lowerDutyTeam := strings.ToLower(game.Fields.DutyTeam)
+				lowerTeamA := strings.ToLower(game.Fields.TeamA)
+				lowerTeamB := strings.ToLower(game.Fields.TeamB)
+				// for every game we expect the duty team to be the requested team
+				if !strings.Contains(lowerDutyTeam, lowerTeam) {
+					t.Errorf("Client.GetGamesByTeamAndDuty() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
 
-				if gameTime.Before(time.Now()) {
-					continue
+				// for every game we expect the requested team not to be playing
+				if lowerTeamA == lowerTeam || lowerTeamB == lowerTeam {
+					t.Errorf("Client.GetGamesByTeamAndDuty() error = %v, wantErr %v", err, tt.wantErr)
+					return
 				}
-
-				futureGames = append(futureGames, game)
-				fmt.Printf("game:[%s vs %s] time:[%s %s]\n", game.Fields.TeamA, game.Fields.TeamB, game.Fields.GameDay, game.Fields.GameTime)
 			}
 
-			fmt.Printf("future games: %v\n", futureGames)
 		})
 	}
 }

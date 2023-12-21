@@ -82,7 +82,7 @@ func (c *Client) GetGamesByTeamAndDuty(limit int, offset, team string) (GetGameR
 		},
 		View:            "RMS - Timeslot",
 		Offset:          offset,
-		FilterByFormula: fmt.Sprintf("AND(OR(SEARCH(\"%s\", LOWER(ARRAYJOIN({LinkTmD})))))", team)}
+		FilterByFormula: fmt.Sprintf("AND(OR(SEARCH(LOWER(\"%s\"), LOWER(ARRAYJOIN({LinkTmD})))))", team)}
 
 	return c.getGames(gameReqBody)
 }
