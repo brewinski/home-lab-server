@@ -34,7 +34,7 @@ func main() {
 	// Page URL to monitor
 	flag.StringVar(&PageUrl, "url", PageUrl, "The URL to monitor for changes")
 	// Parse the flags from the command line
-	flag.StringVar(&NotificationsChannel, "channel", "", "The channel to send notifications")
+	flag.StringVar(&NotificationsChannel, "channel", "volleybot-notifications", "The channel to send notifications")
 	flag.Parse()
 
 	// set json as the default logger
