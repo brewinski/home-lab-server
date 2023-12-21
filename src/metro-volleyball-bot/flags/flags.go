@@ -1,5 +1,5 @@
 package flags
 
 const (
-	BotReadyMessage = false
+	BotReadyMessage = true
 )
