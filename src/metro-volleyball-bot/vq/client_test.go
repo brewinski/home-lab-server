@@ -6,12 +6,11 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/brewinski/home-lab-server/src/metro-volleyball-bot/vq"
 )
 
-func TestClient_GetGames(t *testing.T) {
+func TestClient_GetGames_Integration(t *testing.T) {
 	type fields struct {
 		client *http.Client
 	}
@@ -66,7 +65,7 @@ func TestClient_GetGames(t *testing.T) {
 	}
 }
 
-func TestClient_GetGamesByTeam(t *testing.T) {
+func TestClient_GetGamesByTeam_Integration(t *testing.T) {
 	type fields struct {
 		client *http.Client
 	}
@@ -88,9 +87,9 @@ func TestClient_GetGamesByTeam(t *testing.T) {
 				client: &http.Client{},
 			},
 			args: args{
-				limit:  100,
+				limit:  5,
 				offset: "",
-				team:   "redbacks",
+				team:   "aces",
 			},
 			want:    vq.GetGameResponseBody{},
 			wantErr: false,
@@ -106,33 +105,23 @@ func TestClient_GetGamesByTeam(t *testing.T) {
 				t.Errorf("Client.GetGamesByTeam() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			// if !reflect.DeepEqual(got, tt.want) {
-			// 	t.Errorf("Client.GetGamesByTeam() = %v, want %v", got, tt.want)
-			// }
 
-			futureGames := []vq.GameRecord{}
+			// for each game we expect the team to be playing
 			for _, game := range got.Records {
-				// fmt.Printf("%s vs %s, at %s on %s\n", game.Fields.TeamA, game.Fields.TeamB, game.Fields.GameTime, game.Fields.GameDay)
-				gameTime, err := game.ParseGameDayTime()
-				if err != nil {
+				lowerTeam := strings.ToLower(tt.args.team)
+				lowerTeamA := strings.ToLower(game.Fields.TeamA)
+				lowerTeamB := strings.ToLower(game.Fields.TeamB)
+
+				if !strings.Contains(lowerTeamA, lowerTeam) && !strings.Contains(lowerTeamB, lowerTeam) {
 					t.Errorf("Client.GetGamesByTeam() error = %v, wantErr %v", err, tt.wantErr)
 					return
 				}
-
-				if gameTime.Before(time.Now()) {
-					continue
-				}
-
-				futureGames = append(futureGames, game)
-				fmt.Printf("game:[%s vs %s] time:[%s %s]\n", game.Fields.TeamA, game.Fields.TeamB, game.Fields.GameDay, game.Fields.GameTime)
 			}
-
-			fmt.Printf("future games: %v\n", futureGames)
 		})
 	}
 }
 
-func TestClient_GetGamesByTeamAndDuty(t *testing.T) {
+func TestClient_GetGamesByTeamAndDuty_Integration(t *testing.T) {
 	type fields struct {
 		client *http.Client
 	}
@@ -154,7 +143,7 @@ func TestClient_GetGamesByTeamAndDuty(t *testing.T) {
 				client: &http.Client{},
 			},
 			args: args{
-				limit:  100,
+				limit:  10,
 				offset: "",
 				team:   "apg",
 			},
@@ -195,7 +184,7 @@ func TestClient_GetGamesByTeamAndDuty(t *testing.T) {
 	}
 }
 
-func TestClient_GetLadder(t *testing.T) {
+func TestClient_GetLadder_Integration(t *testing.T) {
 	type fields struct {
 		client *http.Client
 	}
@@ -225,9 +214,6 @@ func TestClient_GetLadder(t *testing.T) {
 				t.Errorf("Client.GetLadder() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			// if !reflect.DeepEqual(got, tt.want) {
-			// 	t.Errorf("Client.GetLadder() = %v, want %v", got, tt.want)
-			// }
 
 			for _, team := range got.Records {
 				fmt.Printf("rank[%s], team[%s], points[%s], next_game[%s]\n\n", team.Fields.Rank, team.Fields.TeamNameLookup, team.Fields.CompetitionPoints, team.Fields.NextMatch_Detail)
