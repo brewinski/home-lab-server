@@ -29,7 +29,7 @@ const (
 )
 
 func main() {
-	// Read the Discord token as an applicatioln flag.
+	// Read the Discord token as an application flag.
 	flag.StringVar(&Token, "t", "", "The token for the specific discord application.")
 	// Read the page check frequency duration. Parsed as "1ms", "1ns", "1s", "1m", or "1h"
 	flag.DurationVar(&TickSpeed, "ts", 1*time.Hour, "Page ping frequency as a string duration")
