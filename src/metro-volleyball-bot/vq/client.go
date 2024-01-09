@@ -303,6 +303,11 @@ func (c *Client) GetLadder() (GetLadderResponseBody, error) {
 		return GetLadderResponseBody{}, fmt.Errorf("GetLadder() request failed, got: %w", err)
 	}
 
+	if res.StatusCode > 399 {
+		body, _ := io.ReadAll(res.Body)
+		return GetLadderResponseBody{}, fmt.Errorf("GetLadder() request failed with status code %d, response body: %s", res.StatusCode, body)
+	}
+
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return GetLadderResponseBody{}, fmt.Errorf("GetLadder() request failed, got: %w", err)

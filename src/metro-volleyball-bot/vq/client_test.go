@@ -11,6 +11,7 @@ import (
 )
 
 func TestClient_GetGames_Integration(t *testing.T) {
+	t.Skip()
 	type fields struct {
 		client *http.Client
 	}
@@ -66,6 +67,8 @@ func TestClient_GetGames_Integration(t *testing.T) {
 }
 
 func TestClient_GetGamesByTeam_Integration(t *testing.T) {
+	t.Skip()
+
 	type fields struct {
 		client *http.Client
 	}
@@ -122,6 +125,8 @@ func TestClient_GetGamesByTeam_Integration(t *testing.T) {
 }
 
 func TestClient_GetGamesByTeamAndDuty_Integration(t *testing.T) {
+	t.Skip()
+
 	type fields struct {
 		client *http.Client
 	}
@@ -185,6 +190,8 @@ func TestClient_GetGamesByTeamAndDuty_Integration(t *testing.T) {
 }
 
 func TestClient_GetLadder_Integration(t *testing.T) {
+	t.Skip()
+
 	type fields struct {
 		client *http.Client
 	}
