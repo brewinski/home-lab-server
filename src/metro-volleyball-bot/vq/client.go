@@ -290,7 +290,7 @@ func (c *Client) GetLadder() (GetLadderResponseBody, error) {
 		return GetLadderResponseBody{}, fmt.Errorf("GetLadder() request failed, got: %w", err)
 	}
 
-	request, err := http.NewRequest(http.MethodPost, ladderApiUrl, bytes.NewBuffer(ladderRequestBody))
+	request, err := http.NewRequest(http.MethodPost, c.apiUrl+ladderPath, bytes.NewBuffer(ladderRequestBody))
 	if err != nil {
 		return GetLadderResponseBody{}, fmt.Errorf("GetLadder() request failed, got: %w", err)
 	}

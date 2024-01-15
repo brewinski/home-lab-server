@@ -24,6 +24,7 @@ var (
 	TickSpeed            time.Duration
 	PageUrl              string
 	NotificationsChannel string
+	VQClientUrl          string
 )
 
 func main() {
@@ -33,8 +34,16 @@ func main() {
 	flag.DurationVar(&TickSpeed, "ts", 1*time.Hour, "Page ping frequency as a string duration")
 	// Page URL to monitor
 	flag.StringVar(&PageUrl, "url", PageUrl, "The URL to monitor for changes")
-	// Parse the flags from the command line
+	// VQ Metro Draw Data Base Url
+	flag.StringVar(
+		&VQClientUrl,
+		"draw-url",
+		"https://vqmetro23s3.softr.app/v1/integrations/airtable/67a0cea2-90f1-4d07-8903-89cda40f4264/appdBNmBQcBRBqB3P",
+		"The channel to send notifications",
+	)
+	// channel to publish notifications to
 	flag.StringVar(&NotificationsChannel, "channel", "volleybot-notifications", "The channel to send notifications")
+	// Parse the flags from the command line
 	flag.Parse()
 
 	// set json as the default logger
@@ -106,6 +115,7 @@ func main() {
 	// volleyball qld client
 	vqClient := vq.NewClient(vq.ClientConfig{
 		Client: &httpClient,
+		ApiUrl: VQClientUrl,
 	})
 
 	// create ladder changes handler

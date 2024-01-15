@@ -1,8 +1,10 @@
 package vq_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"strings"
 	"testing"
@@ -10,8 +12,9 @@ import (
 	"github.com/brewinski/home-lab-server/src/metro-volleyball-bot/vq"
 )
 
+// TODO: with fake responses test get games for team.
+
 func TestClient_GetGames_Integration(t *testing.T) {
-	t.Skip()
 	type fields struct {
 		client *http.Client
 	}
@@ -67,8 +70,6 @@ func TestClient_GetGames_Integration(t *testing.T) {
 }
 
 func TestClient_GetGamesByTeam_Integration(t *testing.T) {
-	t.Skip()
-
 	type fields struct {
 		client *http.Client
 	}
@@ -125,8 +126,6 @@ func TestClient_GetGamesByTeam_Integration(t *testing.T) {
 }
 
 func TestClient_GetGamesByTeamAndDuty_Integration(t *testing.T) {
-	t.Skip()
-
 	type fields struct {
 		client *http.Client
 	}
@@ -189,11 +188,33 @@ func TestClient_GetGamesByTeamAndDuty_Integration(t *testing.T) {
 	}
 }
 
-func TestClient_GetLadder_Integration(t *testing.T) {
-	t.Skip()
+var ladderResponseBody = vq.GetLadderResponseBody{
+	Records: []vq.LadderRecord{
+		{
+			ID: "1",
+			Fields: vq.LadderFields{
+				Rank:     "1",
+				TeamName: "Aces",
+			},
+		},
+		{
+			ID: "2",
+			Fields: vq.LadderFields{
+				Rank:     "1",
+				TeamName: "APG",
+			},
+		},
+	},
+	Offset: "",
+}
 
+func TestClient_GetLadder_Integration(t *testing.T) {
 	type fields struct {
-		client *http.Client
+		// client config
+		client  *http.Client
+		baseUrl string
+		// test server config. (optional) if this is set the test server will be used instead of the base url.
+		testServer *httptest.Server
 	}
 	tests := []struct {
 		name    string
@@ -201,10 +222,37 @@ func TestClient_GetLadder_Integration(t *testing.T) {
 		want    vq.GetLadderResponseBody
 		wantErr bool
 	}{
+		// TODO: TestClient_GetLadder_Integration
 		{
 			name: "TestClient_GetLadder will return a list of teams",
 			fields: fields{
 				client: &http.Client{},
+				testServer: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					if pageId := r.Header.Get("softr-page-id"); pageId == "" {
+						w.WriteHeader(http.StatusBadRequest)
+						w.Write([]byte("missing softr-page-id header"))
+						return
+					}
+
+					ladderBytes, err := json.Marshal(ladderResponseBody)
+					if err != nil {
+						w.WriteHeader(http.StatusInternalServerError)
+						w.Write([]byte("error getting ladder"))
+						return
+					}
+
+					w.WriteHeader(http.StatusOK)
+					w.Write(ladderBytes)
+				})),
+			},
+			want:    vq.GetLadderResponseBody{},
+			wantErr: false,
+		},
+		{
+			name: "TestClient_GetLadder will return a list of teams",
+			fields: fields{
+				client:  &http.Client{},
+				baseUrl: "https://vqmetro23s3.softr.app/v1/integrations/airtable/67a0cea2-90f1-4d07-8903-89cda40f4264/appdBNmBQcBRBqB3P",
 			},
 			want:    vq.GetLadderResponseBody{},
 			wantErr: false,
@@ -212,8 +260,17 @@ func TestClient_GetLadder_Integration(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			testServer := tt.fields.testServer
+			// we need to close the test server after we are done with it.
+			if testServer != nil {
+				defer testServer.Close()
+				// set the testing url to the url of the test server
+				tt.fields.baseUrl = testServer.URL
+			}
+
 			c := vq.NewClient(vq.ClientConfig{
 				Client: tt.fields.client,
+				ApiUrl: tt.fields.baseUrl,
 			})
 
 			got, err := c.GetLadder()
