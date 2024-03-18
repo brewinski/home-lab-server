@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/brewinski/home-lab-server/src/metro-volleyball-bot/bot"
-	"github.com/brewinski/home-lab-server/src/metro-volleyball-bot/monitor"
 	"github.com/brewinski/home-lab-server/src/metro-volleyball-bot/vq"
 	"github.com/bwmarrin/discordgo"
 )
@@ -76,7 +75,7 @@ func main() {
 		case "vb-help":
 			return "no action registered for this command: " + command, nil
 		case "vb-ladder":
-			return ladderGet()
+			return "no action registered for this command: " + command, nil
 		default:
 			// Create the response object
 			return "no action registered for this command" + command, nil
@@ -101,16 +100,6 @@ func main() {
 
 	// register volleybot commands
 	bot.RegisterCommands(dg)
-	// create monitor deps and start monitoring
-	// Draw Pdf monitor
-	pdfMonitor := monitor.New(monitor.Config{
-		Client: &httpClient,
-	})
-	// make initial request for pdf data
-	_, _, err = pdfMonitor.CheckForChanges(PageUrl)
-	if err != nil {
-		slog.Error("pdf initial data request failed", "error", err)
-	}
 
 	// volleyball qld client
 	vqClient := vq.NewClient(vq.ClientConfig{
@@ -129,7 +118,6 @@ func main() {
 		select {
 		case <-time.NewTicker(TickSpeed).C:
 			// monitor the draw pdf page
-			// handlePDFChanges(pdfMonitor, myBot, dg)
 			handleLadderChanges()
 		case <-sc:
 			// Wait until CTRL-C or other term signal is received.
@@ -144,62 +132,6 @@ func main() {
 		}
 	}
 
-}
-
-func handlePDFChanges(m *monitor.DataSourceMonitor, bot *bot.Bot, s *discordgo.Session) {
-	pdfUpdate, _, err := m.CheckForChanges(PageUrl)
-	if err != nil {
-		slog.Error("pdf monitor check for changes", "error", err)
-	}
-
-	if !pdfUpdate {
-		slog.Info("pdf monitor check no changes", "update", pdfUpdate)
-		return
-	}
-
-	slog.Info("pdf monitor check for changes", "update", pdfUpdate)
-
-	messages, errs := bot.ChangeHandler(s, fmt.Sprintf("PDF changed, go to %s and review the changes", PageUrl))
-
-	// log any errors that occurred
-	for _, err := range errs {
-		slog.Error("pdf changes handler message failures", "error", err)
-	}
-
-	// log the messages that were sent
-	for _, message := range messages {
-		slog.Info("pdf changes handler message successes", "message", message)
-	}
-}
-
-func ladderGet() (string, error) {
-	vqClient := vq.NewClient(vq.ClientConfig{
-		Client: &http.Client{
-			Timeout: 10 * time.Second,
-		},
-	})
-
-	ladder, err := vqClient.GetLadder()
-	if err != nil {
-		slog.Error("unable to request initial ladder data from server", "error", err)
-		return "", err
-	}
-
-	sb := strings.Builder{}
-
-	sb.WriteString(fmt.Sprintf("Ladder: %s\n\n", "https://vqmetro23s3.softr.app/ladder-m1 ```"))
-
-	for _, team := range ladder.Records {
-		fields := team.Fields
-		sb.WriteString(fmt.Sprintf("%s. %s\n", fields.Rank, team.Fields.TeamNameLookup))
-		sb.WriteString(fmt.Sprintf("\tpoints: %s\n", fields.CompetitionPoints))
-		sb.WriteString(fmt.Sprintf("\tnext game: %s\n", fields.NextMatch_Detail))
-		sb.WriteString("\n")
-	}
-
-	sb.WriteString("```")
-
-	return sb.String(), nil
 }
 
 func handleLadderChangesFactory(vqClient *vq.Client, bot *bot.Bot, s *discordgo.Session) func() {

@@ -8,6 +8,22 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+// func TestBot_SessionTesting(t *testing.T) {
+
+// 	testHandler := func(s *discordgo.Session, event *discordgo.Ready) {
+// 		// no-op handler for testing
+// 		fmt.Println("test handler")
+// 	}
+
+// 	// Create a new Discord session using the provided bot token.
+// 	d := discordgo.Session{}
+
+// 	d.AddHandler(testHandler)
+
+// 	d.Handle
+
+// }
+
 func TestBot_ReadyHandler(t *testing.T) {
 	type fields struct {
 		lastPageResponse string
