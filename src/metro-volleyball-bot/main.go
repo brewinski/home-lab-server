@@ -129,7 +129,7 @@ func main() {
 		select {
 		case <-time.NewTicker(TickSpeed).C:
 			// monitor the draw pdf page
-			handlePDFChanges(pdfMonitor, myBot, dg)
+			// handlePDFChanges(pdfMonitor, myBot, dg)
 			handleLadderChanges()
 		case <-sc:
 			// Wait until CTRL-C or other term signal is received.
