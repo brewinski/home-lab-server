@@ -95,6 +95,7 @@ func responseWithMessage(s *discordgo.Session, i *discordgo.InteractionCreate, m
 			Content: message,
 		},
 	}
+	slog.Info("responding to interaction", "response", response)
 	// Respond to the interaction with the response object
 	s.InteractionRespond(i.Interaction, &response)
 }

@@ -282,10 +282,11 @@ func (c *Client) GetLadder() (GetLadderResponseBody, error) {
 			Format: "string",
 		},
 		View:            "Admin - Grouped",
-		FilterByFormula: "(LOWER(\"M1\") = LOWER(ARRAYJOIN({Division})))",
+		FilterByFormula: "(LOWER(\"MD\") = LOWER(ARRAYJOIN({Division})))",
 		Rows:            0,
 		Offset:          "",
 	})
+
 	if err != nil {
 		return GetLadderResponseBody{}, fmt.Errorf("GetLadder() request failed, got: %w", err)
 	}

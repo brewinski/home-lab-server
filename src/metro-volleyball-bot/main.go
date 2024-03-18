@@ -52,6 +52,17 @@ func main() {
 		slog.String("page", PageUrl),
 	))
 
+	// create new http client
+	httpClient := http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	// volleyball qld client
+	vqClient := vq.NewClient(vq.ClientConfig{
+		Client: &httpClient,
+		ApiUrl: VQClientUrl,
+	})
+
 	// Create a new Discord session using the provided bot token.
 	dg, err := discordgo.New("Bot " + Token)
 	if err != nil {
@@ -75,21 +86,39 @@ func main() {
 		case "vb-help":
 			return "no action registered for this command: " + command, nil
 		case "vb-ladder":
-			return "no action registered for this command: " + command, nil
+			slog.Info("vb-ladder command received")
+			ladder, err := vqClient.GetLadder()
+			if err != nil {
+				return "", fmt.Errorf("GetLadder unable to get ladder: %w", err)
+			}
+
+			slog.Info("vb-ladder command response", "ladder", ladder)
+			sb := strings.Builder{}
+			sb.WriteString(fmt.Sprintf("Ladder: %s\n\n", "https://vqmetro23s3.softr.app/ladder-m1 ```"))
+
+			for _, team := range ladder.Records {
+				fields := team.Fields
+				sb.WriteString(fmt.Sprintf("%s. %s\n", fields.Rank, team.Fields.TeamNameLookup))
+				sb.WriteString(fmt.Sprintf("\tpoints: %s\n", fields.CompetitionPoints))
+				sb.WriteString(fmt.Sprintf("\tnext game: %s\n", fields.NextMatch_Detail))
+				sb.WriteString("\n")
+			}
+
+			sb.WriteString("```")
+
+			slog.Info("vb-ladder command response", "ladder", sb.String())
+
+			return sb.String(), nil
 		default:
 			// Create the response object
 			return "no action registered for this command" + command, nil
 		}
 	})
+
 	dg.AddHandler(commandHandler)
 
 	// In this example, we only care about receiving message events.
 	dg.Identify.Intents = discordgo.IntentsGuildMessages
-
-	// create new http client
-	httpClient := http.Client{
-		Timeout: 10 * time.Second,
-	}
 
 	// Open a websocket connection to Discord and begin listening.
 	err = dg.Open()
@@ -100,12 +129,6 @@ func main() {
 
 	// register volleybot commands
 	bot.RegisterCommands(dg)
-
-	// volleyball qld client
-	vqClient := vq.NewClient(vq.ClientConfig{
-		Client: &httpClient,
-		ApiUrl: VQClientUrl,
-	})
 
 	// create ladder changes handler
 	handleLadderChanges := handleLadderChangesFactory(vqClient, myBot, dg)
