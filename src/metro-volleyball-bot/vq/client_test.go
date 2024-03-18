@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/brewinski/home-lab-server/src/metro-volleyball-bot/cfg"
 	"github.com/brewinski/home-lab-server/src/metro-volleyball-bot/vq"
 )
 
@@ -222,7 +223,6 @@ func TestClient_GetLadder_Integration(t *testing.T) {
 		want    vq.GetLadderResponseBody
 		wantErr bool
 	}{
-		// TODO: TestClient_GetLadder_Integration
 		{
 			name: "TestClient_GetLadder will return a list of teams",
 			fields: fields{
@@ -252,7 +252,7 @@ func TestClient_GetLadder_Integration(t *testing.T) {
 			name: "TestClient_GetLadder will return a list of teams",
 			fields: fields{
 				client:  &http.Client{},
-				baseUrl: "https://vqmetro23s3.softr.app/v1/integrations/airtable/67a0cea2-90f1-4d07-8903-89cda40f4264/appdBNmBQcBRBqB3P",
+				baseUrl: cfg.VQBaseUrl,
 			},
 			want:    vq.GetLadderResponseBody{},
 			wantErr: false,

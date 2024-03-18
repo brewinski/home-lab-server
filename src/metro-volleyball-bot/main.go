@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/brewinski/home-lab-server/src/metro-volleyball-bot/bot"
+	"github.com/brewinski/home-lab-server/src/metro-volleyball-bot/cfg"
 	"github.com/brewinski/home-lab-server/src/metro-volleyball-bot/vq"
 	"github.com/bwmarrin/discordgo"
 )
@@ -37,7 +38,7 @@ func main() {
 	flag.StringVar(
 		&VQClientUrl,
 		"draw-url",
-		"https://vqmetro23s3.softr.app/v1/integrations/airtable/67a0cea2-90f1-4d07-8903-89cda40f4264/appdBNmBQcBRBqB3P",
+		cfg.VQBaseUrl,
 		"The channel to send notifications",
 	)
 	// channel to publish notifications to

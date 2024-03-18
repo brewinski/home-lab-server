@@ -7,17 +7,16 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/brewinski/home-lab-server/src/metro-volleyball-bot/cfg"
 )
 
 const (
 	// TODO: replace api url with vq api url / env var
 	apiUrl = "https://vqmetro23s3.softr.app/v1/integrations/airtable/67a0cea2-90f1-4d07-8903-89cda40f4264/appdBNmBQcBRBqB3P/Competition%20Manager/records?block_id=77226c67-17e8-4238-b983-db7105c48dfe"
-	// TODO: replace ladder api url with vq api url / env var
-	ladderApiUrl = "https://vqmetro23s3.softr.app/v1/integrations/airtable/67a0cea2-90f1-4d07-8903-89cda40f4264/appdBNmBQcBRBqB3P/Ladder/records?block_id=582e2243-42bb-4233-a84a-ddf9fc5361e1"
 	// TODO: use these vars combined to document the api and paths.
 	vqAPIUrl        = "https://vqmetro23s3.softr.app/v1/integrations/airtable/67a0cea2-90f1-4d07-8903-89cda40f4264/appdBNmBQcBRBqB3P"
 	competitionPath = "/Competition%20Manager/records?block_id=77226c67-17e8-4238-b983-db7105c48dfe"
-	ladderPath      = "/Ladder/records?block_id=582e2243-42bb-4233-a84a-ddf9fc5361e1"
 )
 
 var (
@@ -281,7 +280,7 @@ func (c *Client) GetLadder() (GetLadderResponseBody, error) {
 		}{
 			Format: "string",
 		},
-		View:            "Admin - Grouped",
+		View:            "Division Ranking",
 		FilterByFormula: "(LOWER(\"MD\") = LOWER(ARRAYJOIN({Division})))",
 		Rows:            0,
 		Offset:          "",
@@ -291,13 +290,13 @@ func (c *Client) GetLadder() (GetLadderResponseBody, error) {
 		return GetLadderResponseBody{}, fmt.Errorf("GetLadder() request failed, got: %w", err)
 	}
 
-	request, err := http.NewRequest(http.MethodPost, c.apiUrl+ladderPath, bytes.NewBuffer(ladderRequestBody))
+	request, err := http.NewRequest(http.MethodPost, c.apiUrl+cfg.VQLadderPath, bytes.NewBuffer(ladderRequestBody))
 	if err != nil {
 		return GetLadderResponseBody{}, fmt.Errorf("GetLadder() request failed, got: %w", err)
 	}
 
 	request.Header = defaultRequestHeaders
-	request.Header.Set("softr-page-id", "811945dd-84f4-44c3-b263-6fb9114ba8c3")
+	request.Header.Set("softr-page-id", cfg.VQLadderPageID)
 
 	res, err := c.client.Do(request)
 	if err != nil {
