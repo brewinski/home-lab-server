@@ -258,6 +258,7 @@ func TestClient_GetLadder_Integration(t *testing.T) {
 			wantErr: false,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testServer := tt.fields.testServer

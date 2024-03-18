@@ -281,7 +281,7 @@ func (c *Client) GetLadder() (GetLadderResponseBody, error) {
 			Format: "string",
 		},
 		View:            "Division Ranking",
-		FilterByFormula: "(LOWER(\"MD\") = LOWER(ARRAYJOIN({Division})))",
+		FilterByFormula: cfg.VQLadderFilterByFormula,
 		Rows:            0,
 		Offset:          "",
 	})
