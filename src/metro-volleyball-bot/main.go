@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/signal"
 	"reflect"
-	"strings"
 	"syscall"
 	"time"
 
@@ -94,22 +93,8 @@ func main() {
 			}
 
 			slog.Info("vb-ladder command response", "ladder", ladder)
-			sb := strings.Builder{}
-			sb.WriteString(fmt.Sprintf("Ladder: %s\n\n", "https://vqmetro23s3.softr.app/ladder-m1 ```"))
 
-			for _, team := range ladder.Records {
-				fields := team.Fields
-				sb.WriteString(fmt.Sprintf("%s. %s\n", fields.Rank, team.Fields.TeamNameLookup))
-				sb.WriteString(fmt.Sprintf("\tpoints: %s\n", fields.CompetitionPoints))
-				sb.WriteString(fmt.Sprintf("\tnext game: %s\n", fields.NextMatch_Detail))
-				sb.WriteString("\n")
-			}
-
-			sb.WriteString("```")
-
-			slog.Info("vb-ladder command response", "ladder", sb.String())
-
-			return sb.String(), nil
+			return ladder.ToString(), nil
 		default:
 			// Create the response object
 			return "no action registered for this command" + command, nil
@@ -182,23 +167,11 @@ func handleLadderChangesFactory(vqClient *vq.Client, bot *bot.Bot, s *discordgo.
 		// set the current ladder to the new ladder
 		currentLadder = ladderUpdate
 
-		sb := strings.Builder{}
+		message := ladderUpdate.ToString()
 
-		sb.WriteString(fmt.Sprintf("Ladder changed: %s\n\n", "https://vqmetro23s3.softr.app/ladder-m1 ```"))
+		slog.Info("ladder changes handler message", "message", message)
 
-		for _, team := range ladderUpdate.Records {
-			fields := team.Fields
-			sb.WriteString(fmt.Sprintf("%s. %s\n", fields.Rank, team.Fields.TeamNameLookup))
-			sb.WriteString(fmt.Sprintf("\tpoints: %s\n", fields.CompetitionPoints))
-			sb.WriteString(fmt.Sprintf("\tnext game: %s\n", fields.NextMatch_Detail))
-			sb.WriteString("\n")
-		}
-
-		sb.WriteString("```")
-
-		fmt.Println(sb.String())
-
-		messages, errs := bot.ChangeHandler(s, sb.String())
+		messages, errs := bot.ChangeHandler(s, message)
 
 		// log any errors that occurred
 		for _, err := range errs {
