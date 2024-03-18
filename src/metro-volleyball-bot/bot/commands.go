@@ -20,6 +20,11 @@ var (
 			Description: "view the latest ladder results.",
 			Version:     "1.0.0",
 		},
+		{
+			Name:        "vb-next-game",
+			Description: "view the next game for the team.",
+			Version:     "1.0.0",
+		},
 	}
 )
 

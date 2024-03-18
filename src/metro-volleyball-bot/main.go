@@ -95,6 +95,9 @@ func main() {
 			slog.Info("vb-ladder command response", "ladder", ladder)
 
 			return ladder.ToString(), nil
+		case "vb-next-game":
+			slog.Info("vb-next-game command received")
+			return "no action registered for this command: " + command, nil
 		default:
 			// Create the response object
 			return "no action registered for this command" + command, nil
